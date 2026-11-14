@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>আমার ম্যাথ গেম</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;700&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body {
+  font-family: 'Noto Sans Bengali', 'Comic Sans MS', system-ui, sans-serif;
+  background: linear-gradient(160deg, #ffe9f3 0%, #e3f4ff 50%, #fff8d6 100%);
+  min-height: 100vh; display: flex; justify-content: center;
+  color: #5a4a6a; user-select: none;
+}
+#app { width: 100%; max-width: 480px; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 12px; position: relative; }
+.hidden { display: none !important; }
+.home-btn {
+  position: absolute; top: 12px; left: 12px; font-size: 28px;
+  width: 56px; height: 56px; border: none; border-radius: 18px;
+  background: #ffffffcc; box-shadow: 0 3px 8px #0002; cursor: pointer; z-index: 5;
+}
+.home-btn:active { transform: scale(.92); }
+.cheer { font-size: 44px; letter-spacing: 18px; margin: 14px 0 4px; height: 56px; }
+.cheer span { display: inline-block; transition: transform .2s; }
+.jump { animation: jump .6s ease; }
+@keyframes jump { 0%,100%{transform:translateY(0)} 40%{transform:translateY(-38px) scale(1.15)} }
+h1 { font-size: 34px; color: #d16ba5; text-shadow: 2px 2px 0 #fff; margin: 8px 0 18px; text-align: center; }
+.big-btn {
+  min-height: 74px; width: 100%; font-size: 27px; font-weight: 700;
+  font-family: inherit; color: #5a4a6a; border: none; border-radius: 26px;
+  padding: 14px 20px; margin: 10px 0; cursor: pointer;
+  box-shadow: 0 5px 0 #0001, 0 6px 14px #0002; transition: transform .12s;
+}
+.big-btn:active { transform: scale(.95); }
+.btn-pink  { background: #ffc7dd; }
+.btn-blue  { background: #bfe4ff; }
+.btn-mint  { background: #c4f0d0; }
+.btn-peach { background: #ffd9b3; }
+.btn-lav   { background: #e2ccff; }
+.card {
+  background: #ffffffdd; border-radius: 30px; padding: 18px; width: 100%;
+  box-shadow: 0 6px 18px #0002; text-align: center; margin-top: 6px;
+}
+.question { font-size: 26px; font-weight: 700; color: #8a5a9a; min-height: 36px; }
+.objects { font-size: 34px; line-height: 1.5; min-height: 110px; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 2px 6px; margin: 10px 0; padding: 6px; background: #fdf3ff; border-radius: 22px; }
+.objects .op { font-size: 38px; color: #d16ba5; margin: 0 6px; }
+.objects .gone { opacity: .35; position: relative; display: inline-block; }
+.objects .gone::after { content: '❌'; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: .8em; }
+.answers { display: flex; gap: 10px; justify-content: center; margin-top: 8px; }
+.ans-btn {
+  min-height: 80px; min-width: 88px; flex: 1; font-size: 30px; font-weight: 700;
+  font-family: inherit; border: none; border-radius: 24px; cursor: pointer;
+  background: #fff3c4; color: #6a5a2a; box-shadow: 0 5px 0 #d9c96a; transition: transform .12s;
+}
+.ans-btn small { display: block; font-size: 19px; color: #a08a3a; }
+.ans-btn:active { transform: scale(.93); }
+.feedback { font-size: 27px; font-weight: 700; min-height: 40px; margin: 8px 0 2px; color: #2e9e5b; }
+.feedback.try { color: #e07a3f; }
+.shake { animation: shake .4s; }
+@keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-12px)} 75%{transform:translateX(12px)} }
+.confetti-layer { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 9; }
+.confetto { position: absolute; top: -60px; font-size: 34px; animation: fall linear forwards; }
+@keyframes fall { to { transform: translateY(110vh) rotate(540deg); opacity: .9; } }
+.progress { font-size: 17px; color: #a08ab5; margin-top: 4px; }
+.stars { font-size: 40px; letter-spacing: 6px; margin: 10px 0; min-height: 52px; }
+.shape-box { min-height: 130px; display: flex; align-items: center; justify-content: center; margin: 10px 0; }
+.big-emoji { font-size: 96px; }
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="confetti-layer hidden" id="confetti"></div>
+  <button class="home-btn hidden" id="homeBtn" aria-label="হোম">🏠</button>
+
+  <div class="cheer"><span id="uni">🦄</span><span id="princess">👸</span></div>
+
+  <!-- HOME -->
+  <div id="screen-home">
+    <h1>আমার ম্যাথ গেম</h1>
+    <button class="big-btn btn-pink"  onclick="startGame('add')">➕ যোগ করি</button>
+    <button class="big-btn btn-blue"  onclick="startGame('sub')">➖ বিয়োগ করি</button>
+    <button class="big-btn btn-mint"  onclick="startGame('shape')">🔺 আকৃতি চিনি</button>
+  </div>
+
+  <!-- GAME -->
+  <div id="screen-game" class="hidden" style="width:100%">
+    <div class="card">
+      <div class="progress" id="progress"></div>
+      <div class="question" id="question"></div>
+      <div class="objects" id="objects"></div>
+      <div class="answers" id="answers"></div>
+      <div class="feedback" id="feedback"></div>
+    </div>
+  </div>
+
+  <!-- END -->
+  <div id="screen-end" class="hidden" style="width:100%">
+    <div class="card">
+      <div style="font-size:64px">🏆</div>
+      <div class="question" style="color:#d16ba5;font-size:30px">শাবাশ!</div>
+      <div class="stars" id="finalStars"></div>
+      <button class="big-btn btn-peach" onclick="startGame(currentGame)">আবার খেলি</button>
+      <button class="big-btn btn-lav" onclick="goHome()">🏠 হোম</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const BN = ['০','১','২','৩','৪','৫','৬','৭','৮','৯'];
+const bnNum = n => String(n).split('').map(d => BN[+d]).join('');
+const $ = id => document.getElementById(id);
+const shuffle = a => [...a].sort(() => Math.random() - .5);
+
+const ADD = [
+  {a:10,b:1,op:'+'},{a:10,b:0,op:'+'},{a:10,b:5,op:'+'},
+  {a:3,b:3,op:'+'},{a:4,b:2,op:'+'},{a:8,b:7,op:'+'}
+];
+const SUB = [
+  {a:8,b:7,op:'-'},{a:7,b:7,op:'-'},{a:5,b:0,op:'-'},
+  {a:4,b:2,op:'-'},{a:5,b:2,op:'-'},{a:9,b:3,op:'-'}
+];
+const SHAPES = [
+  {name:'ত্রিভুজ', en:'triangle', svg:'<svg width="110" height="100" viewBox="0 0 110 100"><polygon points="55,8 102,92 8,92" fill="#ff9fb2" stroke="#d16ba5" stroke-width="5" stroke-linejoin="round"/></svg>'},
+  {name:'আয়ত', en:'rectangle', svg:'<svg width="130" height="90" viewBox="0 0 130 90"><rect x="8" y="12" width="114" height="66" rx="8" fill="#9fd4ff" stroke="#3a86c8" stroke-width="5"/></svg>'},
+  {name:'বৃত্ত', en:'circle', svg:'<svg width="100" height="100" viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" fill="#a8ecc0" stroke="#2e9e5b" stroke-width="5"/></svg>'},
+  {name:'কোণক', en:'cone', svg:'<svg width="110" height="110" viewBox="0 0 110 110"><polygon points="55,6 100,84 10,84" fill="#ffd166" stroke="#c8891a" stroke-width="5" stroke-linejoin="round"/><ellipse cx="55" cy="84" rx="45" ry="16" fill="#ffe49a" stroke="#c8891a" stroke-width="5"/></svg>'}
+];
+const FRUITS = ['🍎','🍊','🍓','🍌','🍇'];
+
+let currentGame = 'add', queue = [], qIndex = 0, stars = 0, locked = false;
+
+function show(id) {
+  ['screen-home','screen-game','screen-end'].forEach(s => $(s).classList.toggle('hidden', s !== id));
+  $('homeBtn').classList.toggle('hidden', id === 'screen-home');
+}
+function goHome() { speechSynthesis && speechSynthesis.cancel(); show('screen-home'); }
+$('homeBtn').onclick = goHome;
+
+function speak(text) {
+  try {
+    if (!window.speechSynthesis) return;
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'en-US'; u.rate = 0.85;
+    speechSynthesis.cancel(); speechSynthesis.speak(u);
+  } catch (e) { /* skip silently */ }
+}
+
+function nearby(n) {
+  const opts = new Set();
+  while (opts.size < 2) {
+    const d = n + (Math.random() < .5 ? -1 : 1) * (1 + Math.floor(Math.random() * 3));
+    if (d >= 0 && d !== n) opts.add(d);
+  }
+  return [...opts];
+}
+
+function startGame(game) {
+  currentGame = game; stars = 0; locked = false;
+  if (game === 'add') queue = shuffle(ADD).map(q => ({...q, answer: q.a + q.b, kind: 'add'}));
+  else if (game === 'sub') queue = shuffle(SUB).map(q => ({...q, answer: q.a - q.b, kind: 'sub'}));
+  else queue = shuffle(SHAPES).map(s => ({...s, kind: 'shape'}));
+  qIndex = 0;
+  show('screen-game');
+  renderQuestion();
+}
+
+function emojiRow(n, fruit, crossed) {
+  let s = '';
+  for (let i = 0; i < n; i++) s += `<span class="${crossed && i >= n - crossed ? 'gone' : ''}">${fruit}</span>`;
+  return s;
+}
+
+function renderQuestion() {
+  locked = false;
+  $('feedback').textContent = ''; $('feedback').className = 'feedback';
+  const q = queue[qIndex];
+  $('progress').textContent = `প্রশ্ন ${bnNum(qIndex + 1)} / ${bnNum(queue.length)}`;
+
+  if (q.kind === 'shape') {
+    $('question').textContent = 'এটা কোন আকৃতি?';
+    $('objects').innerHTML = `<div class="shape-box">${q.svg}</div>`;
+    const wrong = shuffle(SHAPES.filter(s => s.name !== q.name)).slice(0, 2).map(s => s.name);
+    renderAnswers(shuffle([q.name, ...wrong]), v => v === q.name, v => v);
+    speak('What shape is this?');
+    return;
+  }
+
+  const fruit = FRUITS[Math.floor(Math.random() * FRUITS.length)];
+  const sym = q.op === '+' ? '+' : '−';
+  $('question').textContent = `${q.a} ${sym} ${q.b} = ?`;
+  $('objects').innerHTML = q.op === '+'
+    ? emojiRow(q.a, fruit) + '<span class="op">+</span>' + emojiRow(q.b, fruit) + '<span class="op">=</span><span class="op">?</span>'
+    : emojiRow(q.a, fruit, q.b) + '<span class="op">=</span><span class="op">?</span>';
+  renderAnswers(shuffle([q.answer, ...nearby(q.answer)]), v => v === q.answer, v => `${v}<small>${bnNum(v)}</small>`);
+  speak(q.op === '+' ? `${q.a} plus ${q.b}` : `${q.a} minus ${q.b}`);
+}
+
+function renderAnswers(options, isCorrect, label) {
+  const box = $('answers'); box.innerHTML = '';
+  options.forEach(v => {
+    const btn = document.createElement('button');
+    btn.className = 'ans-btn'; btn.innerHTML = label(v);
+    btn.onclick = () => checkAnswer(btn, isCorrect(v));
+    box.appendChild(btn);
+  });
+}
+
+function checkAnswer(btn, correct) {
+  if (locked) return;
+  if (!correct) {
+    btn.classList.remove('shake'); void btn.offsetWidth; btn.classList.add('shake');
+    const f = $('feedback'); f.textContent = 'আবার চেষ্টা করো'; f.className = 'feedback try';
+    return;
+  }
+  locked = true; stars++;
+  const f = $('feedback'); f.textContent = 'ঠিক আছে! 🌟'; f.className = 'feedback';
+  jumpUnicorn(); burstConfetti();
+  setTimeout(() => {
+    qIndex++;
+    if (qIndex < queue.length) renderQuestion(); else showEnd();
+  }, 1500);
+}
+
+function jumpUnicorn() {
+  ['uni','princess'].forEach(id => {
+    const el = $(id); el.classList.remove('jump'); void el.offsetWidth; el.classList.add('jump');
+  });
+}
+
+function burstConfetti() {
+  const layer = $('confetti'); layer.innerHTML = ''; layer.classList.remove('hidden');
+  const bits = ['🎉','⭐','🌟','✨','🎊','💫'];
+  for (let i = 0; i < 28; i++) {
+    const s = document.createElement('span');
+    s.className = 'confetto'; s.textContent = bits[i % bits.length];
+    s.style.left = Math.random() * 100 + '%';
+    s.style.animationDelay = (Math.random() * .7) + 's';
+    s.style.animationDuration = (1.4 + Math.random()) + 's';
+    layer.appendChild(s);
+  }
+  setTimeout(() => layer.classList.add('hidden'), 2600);
+}
+
+function showEnd() {
+  $('finalStars').textContent = '⭐'.repeat(stars) + ' ' + bnNum(stars);
+  burstConfetti();
+  speak('Great job!');
+  show('screen-end');
+}
+</script>
+</body>
+</html>
